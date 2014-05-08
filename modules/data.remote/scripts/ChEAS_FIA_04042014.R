@@ -48,6 +48,12 @@ if(machine==1){ #Brady's Mac paths
 }
 
 #Extract palsar data from calibration coordinates
+
+#########################################################
+##                                                     ##
+##              Run Extraction function                ##
+##                                                     ##
+#########################################################
 palsar.extractor(kml,fia,leaf.off,plot_ext)
 
 ## Create working copy of data (so that I don't need to re-extract if I screw up the data)
@@ -130,7 +136,9 @@ dat48$HHse_data_48m<- as.numeric(as.character(dat48$HHse_data_48m))
 dat48$HVse_data_48m<- as.numeric(as.character(dat48$HVse_data_48m))
 
 #########################################################
-## Run plotting function
+##                                                     ##
+##              Run plotting function                  ##
+##                                                     ##
 #########################################################
 palsar.plotter(outpath,coord.set,fia)
 
@@ -178,22 +186,23 @@ dev.off()
 
 
 
-
 #########################################################
-## Run curve fitting function
+##                                                     ##
+##              Run curve fitting function             ##
+##                                                     ##
 #########################################################
 
-n.reps<- 1000 #sets value for n.adapt and n.iter
+n.reps<- 5000 #sets value for n.adapt and n.iter
 n.chain<-3 #number of MCMC chains to run
 bayes.curve.fit(outpath,coord.set,fia,n.reps,n.chain)
 
 
 
-
-
-
 #########################################################
-## HERE THERE BE DRAGONS! (old/obselete/deprecated)
+##                                                     ##
+##               HERE THERE BE DRAGONS!                ##
+##          (old/obselete/deprecated code)             ##
+##                                                     ##
 #########################################################
 # ##Plot timeseries of backscatter values from each set of coords
 # par(mfrow=c(2,2))

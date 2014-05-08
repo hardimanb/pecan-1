@@ -4,13 +4,16 @@ bayes.curve.fit<-function(outpath,coord.set,fia,n.reps,n.chain){
 library(rjags)
 require(R2HTML)
 
+
 dat48<-read.csv(file=paste(outpath,"/",coord.set[fia+1],"_dat48.csv",sep=""),header=T,sep=",")
 dir.create(file.path(outpath,"model_output"))
 outpath1<-file.path(outpath,"model_output")
 # outpath <- file.path("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/data") ##For saving
 
-x<-dat48$biomass
-yvars<- c("dat48$HH.sigma.48", "dat48$HV.sigma.48")
+sort_dat48<-dat48[order(dat48$biomass),]#Sort dat48 by biomass (this is useful later on)
+
+x<-sort_dat48$biomass
+yvars<- c("sort_dat48$HH.sigma.48", "sort_dat48$HV.sigma.48")
 
 # n.reps<- 500 #sets value for n.adapt and n.iter
 # n.chain<-3 #number of MCMC chains to run
@@ -387,15 +390,18 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     xseq = seq(0,300,length=3000)
     eval(parse(text=model.fits[j])) #plot fitted curve line
     
-    npred = 10
+    npred = 10000
     ypred = matrix(NA,npred,length(xseq))
+    
     samp = sample(1:nrow(out),npred)
     for(p in 1:npred){
       k = samp[p]
       ypred[p,] = eval(parse(text=mod.eqns[j]))
+      
     }
     #Add confidence interval
     yci = apply(ypred,2,quantile,c(0.025,0.5,0.975))
+    ypi = apply()
     lines(xseq,yci[1,],col=3)
     lines(xseq,yci[3,],col=3)
     legend("topright",lty=c(1,1,1),col=c("grey",2,3),legend=c("Loess","Curve Fit","95% C.I."),bty="n")
