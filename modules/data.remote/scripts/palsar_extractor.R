@@ -1,18 +1,18 @@
-palsar.extractor<-function(kml,fia,leaf.off,plot_ext){
+palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
   
   require(sp)
   require(rgdal)
   require(raster)
-  require(chron)
-  require(RgoogleMaps)
-  require(maptools)
-  require(ggplot2)
-  require(car)
-  require(spatstat)
-  require(fields)
-  require(reshape)
-  require(rjags)
-  require(R2HTML)
+#   require(chron)
+#   require(RgoogleMaps)
+#   require(maptools)
+#   require(ggplot2)
+#   require(car)
+#   require(spatstat)
+#   require(fields)
+#   require(reshape)
+#   require(rjags)
+#   require(R2HTML)
   
   coord.set<-c("WLEF", "FIA")
   
@@ -97,9 +97,11 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext){
   
   # writeOGR(cheasFIA, layer=1, "cheas_FIA.kml", driver="KML") #export as kml (this puts in in the Home folder) 
   
-  ################################
-  ## Begin extracting PALSAR values at FIA plot coordinates
-  ################################
+  ################################################################
+  ##                                                            ##
+  ##    Begin extracting PALSAR values at FIA plot coordinates  ##
+  ##                                                            ##
+  ################################################################
   pol_bands<-c("HH", "HV")
   numfiles<-length(list.files(file.path(palsar_inpath, pol_bands[1]), pattern=".tif" ,recursive=F))
   
@@ -185,7 +187,7 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext){
     extracted_48m<-rbind(extracted_48m,all_48)
     
     #Create figure showing palsar scn extent and overlay with plot coordinates
-    #NOTE:This was created to verify that zeros int he output of palsar data actually come from plots
+    #NOTE:This was created to verify that zeros in the output of palsar data actually come from plots
     #     that fall outside of a particular scene
     if(plot_ext==1){
       plot(extent(HV_rast))

@@ -336,8 +336,8 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     ##Create dir for output from each model x polband x site combination
     dir.create(file.path(outpath1,coord.set[fia+1]))
           outpath2<-file.path(outpath1,coord.set[fia+1])
-    dir.create(file.path(outpath2,substr(yvars[i],7,8)))
-          outpath3<-file.path(outpath2,substr(yvars[i],7,8))
+    dir.create(file.path(outpath2,substr(yvars[i],12,13)))
+          outpath3<-file.path(outpath2,substr(yvars[i],12,13))
     dir.create(file.path(outpath3,mod.names[j]))       
           outpath4<-file.path(outpath3,mod.names[j])   
                
@@ -355,25 +355,25 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     
     #Save MCMC output
     write.csv(out,file.path(outpath4,
-                            paste("MCMC_out",coord.set[fia+1],substr(yvars[i],7,8),mod.names[j],".csv",sep="_")),
+                            paste("MCMC_out",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".csv",sep="_")),
               row.names=FALSE)
     
     #Save xy pairs
     write.csv(cbind(x,y),file.path(outpath4,
-                                   paste("xy_pairs",coord.set[fia+1],substr(yvars[i],7,8),mod.names[j],".csv",sep="_")),
+                                   paste("xy_pairs",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".csv",sep="_")),
               row.names=FALSE)
     
     gelman.diag(jags.out)
     summary(jags.out)
     ##Save model output summary
     saveRDS(summary(jags.out),file=file.path(outpath4,
-                                             paste("Jags_Out",coord.set[fia+1],substr(yvars[i],7,8),mod.names[j],".Rdata",sep="_")))
+                                             paste("Jags_Out",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".Rdata",sep="_")))
     saveRDS(gelman.diag(jags.out),file=file.path(outpath4,
-                                                 paste("Gelman_Diag",coord.set[fia+1],substr(yvars[i],7,8),mod.names[j],".Rdata",sep="_")))
+                                                 paste("Gelman_Diag",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".Rdata",sep="_")))
     
     
     #Generate pdf of curve fits
-    pdf(paste(paste(outpath4,"/","curve_fit_",coord.set[fia+1],sep=""),substr(yvars[i],7,8),mod.names[j],".pdf",sep="_"),width = 6, height = 6, paper='special')
+    pdf(paste(paste(outpath4,"/","curve_fit_",coord.set[fia+1],sep=""),substr(yvars[i],12,13),mod.names[j],".pdf",sep="_"),width = 6, height = 6, paper='special')
     
     par(mar = rep(2, 4))    
     plot(jags.out)
@@ -385,23 +385,23 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     #plot data
     par(mfrow=c(1,1))
     parm = apply(out,2,mean)
-    plot(x,y,pch=".",xlab="Biomass",ylab=yvars[i],main=paste(mod.names[j],"fit of",yvars[i],sep=" ")) #plot data
+    plot(x,y,pch=".",col="grey", xlab="Biomass",ylab=yvars[i],main=paste(mod.names[j],"fit of",yvars[i],sep=" ")) #plot data
     lines(loess.smooth(x,y), col="grey", lty=1, lwd=1)
-    xseq = seq(0,300,length=3000)
+    xseq = seq(0,max(x),length=max(x)*10)
     eval(parse(text=model.fits[j])) #plot fitted curve line
     
     npred = 10000
-    ypred = matrix(NA,npred,length(xseq))
+    yest = matrix(NA,npred,length(xseq)) #y values (palsar) estimated from fitted x values (biomass)
     
     samp = sample(1:nrow(out),npred)
     for(p in 1:npred){
       k = samp[p]
-      ypred[p,] = eval(parse(text=mod.eqns[j]))
+      yest[p,] = eval(parse(text=mod.eqns[j]))
       
     }
     #Add confidence interval
-    yci = apply(ypred,2,quantile,c(0.025,0.5,0.975))
-    ypi = apply()
+    yci = apply(yest,2,quantile,c(0.025,0.5,0.975)) #confidence interval
+#     ypi = apply() #predictive interval
     lines(xseq,yci[1,],col=3)
     lines(xseq,yci[3,],col=3)
     legend("topright",lty=c(1,1,1),col=c("grey",2,3),legend=c("Loess","Curve Fit","95% C.I."),bty="n")

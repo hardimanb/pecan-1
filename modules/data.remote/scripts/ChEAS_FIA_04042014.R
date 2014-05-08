@@ -11,19 +11,21 @@
 # require(sp)
 # require(rgdal)
 # require(raster)
-# require(chron)
+require(chron)
 # require(RgoogleMaps)
 # require(maptools)
 # require(ggplot2)
 # require(car)
 # require(spatstat)
-# require(fields)
+require(fields)
 # require(reshape)
 # require(rjags)
 # require(R2HTML)
 
 ################################
-## OPTIONS
+##                            ##
+##         OPTIONS            ##
+##                            ##
 ################################
 kml=0 #1 = generate and save kml files of extraction coordinates; 0 = do not generate new kml
 fia=0 #1 = use FIA coordinates, 0 = use WLEF/Park Falls Tower coordinates
@@ -54,7 +56,7 @@ if(machine==1){ #Brady's Mac paths
 ##              Run Extraction function                ##
 ##                                                     ##
 #########################################################
-palsar.extractor(kml,fia,leaf.off,plot_ext)
+palsar.extractor(kml,fia,leaf.off,plot_ext,machine)
 
 ## Create working copy of data (so that I don't need to re-extract if I screw up the data)
 ## NOTE: Here I remove the NAs from coords that don't fall with in the scene and 
