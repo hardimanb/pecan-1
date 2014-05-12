@@ -44,7 +44,7 @@ coord.set<-c("WLEF", "FIA")
 ##                                                     ##
 #########################################################
 metadata.inpath<- file.path("/Users/hardimanb/Desktop/Bradys/Research/Palsar_cheas/cheas")
-extract_palsar_metadata_function(metadata.inpath)
+metadata_extractor(metadata.inpath)
 write.csv(metadata,file="/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv")
 
 #########################################################

@@ -5,7 +5,7 @@
 ##                                                     ##
 #########################################################
 
-extract_palsar_metadata_function <-function(metadata.inpath){
+metadata_extractor<-function(metadata.inpath){
   inpath<-metadata.inpath
   numfiles<-length(list.files(inpath))
   
