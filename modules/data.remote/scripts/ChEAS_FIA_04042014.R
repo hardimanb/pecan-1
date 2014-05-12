@@ -36,6 +36,22 @@ machine=1 #1=Brady's Mac; 1=Brady's Linux
 
 coord.set<-c("WLEF", "FIA")
 
+#########################################################
+##                                                     ##
+##              Run Metadata Extractor                 ##
+##                                                     ##
+##  Note: This only needs to be run once for each site.##
+##                                                     ##
+#########################################################
+metadata.inpath<- file.path("/Users/hardimanb/Desktop/Bradys/Research/Palsar_cheas/cheas")
+extract_palsar_metadata_function(metadata.inpath)
+write.csv(metadata,file="/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv")
+
+#########################################################
+##                                                     ##
+##                  Set pathways                       ##
+##                                                     ##
+#########################################################
 if(machine==2){ #Brady's Linux paths
   metadata<- read.csv("/home/bhardima/pecan/modules/data.remote/output/metadata/output_metadata.csv", sep="\t", header=T) ##for Brady's Linux
   palsar_inpath <- file.path("/home/bhardima/Desktop/cheas/geo_corrected_single_sigma") ##location of PALSAR raw files
@@ -43,14 +59,13 @@ if(machine==2){ #Brady's Linux paths
   outpath <- file.path("/home/bhardima/pecan/modules/data.remote/output/data") ##For saving
 } 
 if(machine==1){ #Brady's Mac paths
-  metadata<- read.csv("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv", sep="\t", header=T) ##location of PALSAR metadata table
+  metadata<- read.csv("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv", sep=",", header=T) ##location of PALSAR metadata table
   palsar_inpath <- file.path("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/palsar_scenes/geo_corrected_single_sigma") ##location of PALSAR raw files
   calib_inpath <-"/Users/hardimanb/Desktop/data.remote(Andys_Copy)/biometry" ##location of file containing (FIA) plot coords and biomass values for calibrating PALSAR backscatter 
   outpath <- file.path("/Users/hardimanb/Dropbox/PALSAR_Biomass_Study/data") ##For saving  
 }
 
 #Extract palsar data from calibration coordinates
-
 #########################################################
 ##                                                     ##
 ##              Run Extraction function                ##
@@ -193,10 +208,13 @@ dev.off()
 ##              Run curve fitting function             ##
 ##                                                     ##
 #########################################################
-
 n.reps<- 5000 #sets value for n.adapt and n.iter
 n.chain<-3 #number of MCMC chains to run
 bayes.curve.fit(outpath,coord.set,fia,n.reps,n.chain)
+
+
+
+
 
 
 
