@@ -77,7 +77,7 @@ palsar.extractor(kml,fia,leaf.off,plot_ext,machine)
 ## NOTE: Here I remove the NAs from coords that don't fall with in the scene and 
 ##       the zeros that are an artifact of the mismatch between palsar bbox dim and palsar raster dim (due to tilted orbital path)
 dat48<-data.frame(na.exclude(extracted_48m))
-colnames(dat48)<-c("scnid","scndate", "plot", "UTM.lat", "UTM.lon", "biomass","HH.sigma.48", "HV.sigma.48","HHse_data_48m","HVse_data_48m")
+colnames(dat48)<-c("scnid","scndate", "angle", "plot", "UTM.lat", "UTM.lon", "biomass","HH.sigma.48", "HV.sigma.48","HHse_data_48m","HVse_data_48m")
 
 
 ## NOTE: Converting to dataframe changes all values to factor, so here I reformat the data and save it

@@ -23,7 +23,7 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
     outpath <- file.path("/home/bhardima/pecan/modules/data.remote/output/data") ##For saving
   } 
   if(machine==1){ #Brady's Mac paths
-    metadata<- read.csv("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv", sep="\t", header=T) ##location of PALSAR metadata table
+    metadata<- read.csv("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/metadata/output_metadata.csv", sep=",", header=T) ##location of PALSAR metadata table
     palsar_inpath <- file.path("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/palsar_scenes/geo_corrected_single_sigma") ##location of PALSAR raw files
     calib_inpath <-"/Users/hardimanb/Desktop/data.remote(Andys_Copy)/biometry" ##location of file containing (FIA) plot coords and biomass values for calibrating PALSAR backscatter 
     outpath <- file.path("/Users/hardimanb/Dropbox/PALSAR_Biomass_Study/data") ##For saving  
@@ -112,7 +112,7 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
   # colnames(disturbance_extracted)<-col_names
   # colnames(disturbance_extracted_40m)<-col_names
   
-  extracted_48m<-matrix(nrow=0, ncol=10) #matrix to store extracted palsar values. nrow=number of coordinates being extracted. ncol=# of pol_bands
+  extracted_48m<-matrix(nrow=0, ncol=11) #matrix to store extracted palsar values. nrow=number of coordinates being extracted. ncol=# of pol_bands
   
   #Start file of scene extent figures
   pdf(paste(outpath,"/",coord.set[fia+1], "_SceneExtent_with_plot_overlay.pdf",sep=""),width = 6, height = 6, paper='special')
@@ -176,12 +176,13 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
     
     scnid<-matrix(substr(as.character(HV_filelist[i]),1,15),nrow=length(HH_data_48m),ncol=1) #vector of this scnid. length = number of coords in this scene
     palsar_date<-matrix(as.character(as.Date(substr(as.character(metadata$scndate[metadata$scnid==scnid[1]]),1,8),"%Y%m%d")),nrow=length(HH_data_48m),ncol=1) # same as above for scn date
+    angle<-as.character(metadata$angle[metadata$scnid==scnid[1]])
     
     ##cbind for output
     if(fia==1){
-      all_48<- cbind(scnid,palsar_date,plot,spcheascoords[coords.in.rast]@coords,biomass[coords.in.rast],HH_data_48m,HV_data_48m,HHse_data_48m,HVse_data_48m) #for FIA (no plot identifiers)
+      all_48<- cbind(scnid,palsar_date,angle,plot,spcheascoords[coords.in.rast]@coords,biomass[coords.in.rast],HH_data_48m,HV_data_48m,HHse_data_48m,HVse_data_48m) #for FIA (no plot identifiers)
     } else{
-      all_48<- cbind(scnid,palsar_date,as.character(calib_infile$plot[coords.in.rast]),spcheascoords[coords.in.rast]@coords,biomass[coords.in.rast],HH_data_48m,HV_data_48m,HHse_data_48m,HVse_data_48m) #for WLEF
+      all_48<- cbind(scnid,palsar_date,angle,as.character(calib_infile$plot[coords.in.rast]),spcheascoords[coords.in.rast]@coords,biomass[coords.in.rast],HH_data_48m,HV_data_48m,HHse_data_48m,HVse_data_48m) #for WLEF
     }
     
     extracted_48m<-rbind(extracted_48m,all_48)
