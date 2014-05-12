@@ -71,7 +71,7 @@ if(machine==1){ #Brady's Mac paths
 ##              Run Extraction function                ##
 ##                                                     ##
 #########################################################
-palsar.extractor(kml,fia,leaf.off,plot_ext,machine)
+extracted_48m <- palsar.extractor(kml,fia,leaf.off,plot_ext,machine)
 
 ## Create working copy of data (so that I don't need to re-extract if I screw up the data)
 ## NOTE: Here I remove the NAs from coords that don't fall with in the scene and 
@@ -83,6 +83,7 @@ colnames(dat48)<-c("scnid","scndate", "angle", "plot", "UTM.lat", "UTM.lon", "bi
 ## NOTE: Converting to dataframe changes all values to factor, so here I reformat the data and save it
 dat48$scnid<-as.character(dat48$scnid)
 dat48$scndate<-as.Date(dat48$scndate,"%Y-%m-%d")
+dat48$angle<-as.numeric(as.character(dat48$angle))
 dat48$plot<-as.character(dat48$plot)
 dat48$UTM.lat<- as.numeric(as.character(dat48$UTM.lat))
 dat48$UTM.lon<- as.numeric(as.character(dat48$UTM.lon))
@@ -141,6 +142,7 @@ dat48<-read.csv(paste(outpath,"/",coord.set[fia+1],"_dat48.csv",sep=""),header =
 #Correctly format data (again...sigh...)
 dat48$scnid<-as.character(dat48$scnid)
 dat48$scndate<-as.Date(dat48$scndate,"%Y-%m-%d")
+dat48$angle<-as.numeric(as.character(dat48$angle))
 dat48$plot<-as.numeric(dat48$plot)
 dat48$UTM.lat<- as.numeric(as.character(dat48$UTM.lat))
 dat48$UTM.lon<- as.numeric(as.character(dat48$UTM.lon))
@@ -151,6 +153,7 @@ dat48$year<-as.numeric(format(dat48$scndate,"%Y"))
 dat48$month<-as.numeric(format(dat48$scndate,"%m"))
 dat48$HHse_data_48m<- as.numeric(as.character(dat48$HHse_data_48m))
 dat48$HVse_data_48m<- as.numeric(as.character(dat48$HVse_data_48m))
+
 
 #########################################################
 ##                                                     ##
@@ -201,6 +204,12 @@ for(y in unique(dat48$year)){
 }#for y
 dev.off()
 
+#########################################################
+##                                                     ##
+##              Subtract scndate residuals             ##
+##                                                     ##
+#########################################################
+## This is to reduce scene-effects
 
 
 #########################################################
