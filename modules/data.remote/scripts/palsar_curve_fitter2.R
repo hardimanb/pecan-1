@@ -1,20 +1,20 @@
 
-bayes.curve.fit<-function(outpath,coord.set,fia,n.reps,n.chain){
+bayes.curve.fit2<-function(outpath,coord.set,fia,n.reps,n.chain){
   
 library(rjags)
 require(R2HTML)
 
 dat48<-read.csv(file=paste(outpath,"/",coord.set[fia+1],"_dat48.csv",sep=""),header=T,sep=",")
-if(file.exists(file.path(outpath,"model_output",coord.set[fia+1],"UNCORRECTED"))==FALSE){
-  dir.create(file.path(outpath,"model_output",coord.set[fia+1],"UNCORRECTED"),recursive=TRUE)
+if(file.exists(file.path(outpath,"model_output",coord.set[fia+1],"CORRECTED"))==FALSE){
+  dir.create(file.path(outpath,"model_output",coord.set[fia+1],"CORRECTED"),recursive=TRUE)
 }
-outpath1<-file.path(outpath,"model_output",coord.set[fia+1],"UNCORRECTED")
+outpath1<-file.path(outpath,"model_output",coord.set[fia+1],"CORRECTED")
 # outpath <- file.path("/Users/hardimanb/Desktop/data.remote(Andys_Copy)/output/data") ##For saving
 
 sort_dat48<-dat48[order(dat48$biomass),]#Sort dat48 by biomass (this is useful later on)
 
 x<-sort_dat48$biomass
-yvars<- c("sort_dat48$HH.sigma.raw", "sort_dat48$HV.sigma.raw")
+yvars<- c("sort_dat48$HH.scn.corr", "sort_dat48$HV.scn.corr")
 
 # n.reps<- 500 #sets value for n.adapt and n.iter
 # n.chain<-3 #number of MCMC chains to run
@@ -345,8 +345,8 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
       dir.create(file.path(outpath1,substr(yvars[i],12,13),mod.names[j]),recursive=TRUE)
     }
     outpath2<-file.path(file.path(outpath1,substr(yvars[i],12,13),mod.names[j]))
-    
-    
+
+               
     ##Do JAGS stuff
     j1 = jags.model(file=textConnection(models[j]),
                     data = data,
@@ -407,7 +407,7 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     }
     #Add confidence interval
     yci = apply(yest,2,quantile,c(0.025,0.5,0.975)) #confidence interval
-    #     ypi = apply() #predictive interval
+#     ypi = apply() #predictive interval
     lines(xseq,yci[1,],col=3)
     lines(xseq,yci[3,],col=3)
     legend("topright",lty=c(1,1,1),col=c("grey",2,3),legend=c("Loess","Curve Fit","95% C.I."),bty="n")

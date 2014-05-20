@@ -45,7 +45,8 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
     }
   }else{#EXTRACTS FROM WLEF COORDINATES
     calib_infile <-read.csv(file.path(calib_inpath,"biometry_trimmed.csv"), sep=",", header=T) #WLEF plots
-    calib_infile<-aggregate(calib_infile, list(calib_infile[,1]), mean) ##This will give errors, but these can be safely ignored
+    calib_infile<-aggregate(calib_infile, list(calib_infile[,1]), mean) 
+    print("This will give errors, but these should be safe to ignore")
     calib_infile$plot<-calib_infile$Group.1
     calib_infile<-cbind(calib_infile[,2],calib_infile[,5:9])
     colnames(calib_infile)<-c("plot","easting","northing","adult_density","sapling_density","ABG_biomass")
@@ -170,7 +171,8 @@ palsar.extractor<-function(kml,fia,leaf.off,plot_ext,machine){
     buff.dim.list<-extract(HH_rast, spcheascoords[coords.in.rast], method="simple",buffer=48, small=T, cellnumbers=TRUE)
     #number of pixles in each buffer
     ncells<-matrix(unlist(lapply(buff.dim.list,dim)),nrow=2)[1,]   
-    #Extract stdev of cell values in buffer, divide by sqrt(n)  
+    
+    #Extract stdev of cell values in buffer, divide by sqrt(n) to give standard error
     HHse_data_48m<-extract(HH_rast, spcheascoords[coords.in.rast], method="simple",buffer=48, small=T, fun=sd)/sqrt(ncells)  
     HVse_data_48m<-extract(HV_rast, spcheascoords[coords.in.rast], method="simple",buffer=48, small=T, fun=sd)/sqrt(ncells)
     
