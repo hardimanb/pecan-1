@@ -2,7 +2,7 @@
 bayes.curve.fit<-function(outpath,coord.set,fia,n.reps,n.chain){
   
 library(rjags)
-require(R2HTML)
+# require(R2HTML)
 
 dat48<-read.csv(file=paste(outpath,"/",coord.set[fia+1],"_dat48.csv",sep=""),header=T,sep=",")
 if(file.exists(file.path(outpath,"model_output",coord.set[fia+1],"UNCORRECTED"))==FALSE){
@@ -205,16 +205,16 @@ H4.yint.var.names<-c("a","b","c","yint","sd") #for H4.yint
 Ri.yint.var.names <-c("a","b","yint","sd") #for Ri.yint
 Log.yint.var.names<-c("a","b","yint","sd") #for Log.yint
 
-MM.lines<-"lines(xseq,(parm[1]*xseq)/(parm[2]+xseq),col=2,lwd=3)"  #For MM
-H3.lines<-"lines(xseq,(parm[1]*xseq^2)/(parm[2]^2+xseq^2),col=2,lwd=3)" #For H3
-H4.lines<-"lines(xseq,(parm[1]*xseq^2)/(parm[2]+parm[3]*xseq+xseq^2),col=2,lwd=3)"  #For H4
-Ri.lines<-"lines(xseq,(parm[1]*xseq*exp(-parm[2]*xseq)),col=2,lwd=3)"  #For Ri  a*x[i]*exp(-b*x[i])
-Log.lines<-"lines(xseq,parm[1]/(1+exp(parm[1]-parm[2]*xseq)),col=2,lwd=3)"  #For Log exp(a+b*x[i])/(1+exp(a+b*x[i]))
-MM.yint.lines<-"lines(xseq,((parm[1]*xseq)/(parm[2]+xseq))+parm[4],col=2,lwd=3)"  #For MM.yint
-H3.yint.lines<-"lines(xseq,((parm[1]*xseq^2)/(parm[2]^2+xseq^2))+parm[4],col=2,lwd=3)" #For H3.yint
-H4.yint.lines<-"lines(xseq,((parm[1]*xseq^2)/(parm[2]+parm[3]*xseq+xseq^2))+parm[5],col=2,lwd=3)"  #For H4.yint
-Ri.yint.lines<-"lines(xseq,(parm[1]*xseq*exp(-parm[2]*xseq))+parm[4],col=2,lwd=3)"  #For Ri.yint
-Log.yint.lines<-"lines(xseq,(parm[1]/(1+exp(parm[1]-parm[2]*xseq)))+parm[4],col=2,lwd=3)"  #For Log.yint
+MM.lines<-"lines(xseq,(parm[1]*xseq)/(parm[2]+xseq),col=1,lwd=3)"  #For MM
+H3.lines<-"lines(xseq,(parm[1]*xseq^2)/(parm[2]^2+xseq^2),col=1,lwd=3)" #For H3
+H4.lines<-"lines(xseq,(parm[1]*xseq^2)/(parm[2]+parm[3]*xseq+xseq^2),col=1,lwd=3)"  #For H4
+Ri.lines<-"lines(xseq,(parm[1]*xseq*exp(-parm[2]*xseq)),col=1,lwd=3)"  #For Ri  a*x[i]*exp(-b*x[i])
+Log.lines<-"lines(xseq,parm[1]/(1+exp(parm[1]-parm[2]*xseq)),col=1,lwd=3)"  #For Log exp(a+b*x[i])/(1+exp(a+b*x[i]))
+MM.yint.lines<-"lines(xseq,((parm[1]*xseq)/(parm[2]+xseq))+parm[4],col=1,lwd=3)"  #For MM.yint
+H3.yint.lines<-"lines(xseq,((parm[1]*xseq^2)/(parm[2]^2+xseq^2))+parm[4],col=1,lwd=3)" #For H3.yint
+H4.yint.lines<-"lines(xseq,((parm[1]*xseq^2)/(parm[2]+parm[3]*xseq+xseq^2))+parm[5],col=1,lwd=3)"  #For H4.yint
+Ri.yint.lines<-"lines(xseq,(parm[1]*xseq*exp(-parm[2]*xseq))+parm[4],col=1,lwd=3)"  #For Ri.yint
+Log.yint.lines<-"lines(xseq,(parm[1]/(1+exp(parm[1]-parm[2]*xseq)))+parm[4],col=1,lwd=3)"  #For Log.yint
 
 MM.mod.eqn<-"(out[k,1]*xseq)/(out[k,2]+xseq)"
 H3.mod.eqn<-"(out[k,1]*xseq^2)/(out[k,2]^2+xseq^2)"
@@ -354,9 +354,11 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
                     n.chains=n.chain,
                     n.adapt=min(0.1*n.reps,1000))
     
+    ##MCMC to sample from model
     jags.out = coda.samples(model=j1,
                             variable.names<-var.names[j][[1]],
                             n.iter = n.reps) 
+    dic <- dic.samples(model=j1,n.iter = n.reps/5)
     out <- as.matrix(jags.out)
     
     #Save MCMC output
@@ -369,11 +371,11 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
                                    paste("xy_pairs",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".csv",sep="_")),
               row.names=FALSE)
     
-    gelman.diag(jags.out)
+    ##Generate and Save model output summary
     summary(jags.out)
-    ##Save model output summary
     saveRDS(summary(jags.out),file=file.path(outpath2,
                                              paste("Jags_Out",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".Rdata",sep="_")))
+    gelman.diag(jags.out)
     saveRDS(gelman.diag(jags.out),file=file.path(outpath2,
                                                  paste("Gelman_Diag",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".Rdata",sep="_")))
     
@@ -391,26 +393,52 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     #plot data
     par(mfrow=c(1,1))
     parm = apply(out,2,mean)
-    plot(x,y,pch=".",col="grey", xlab="Biomass",ylab=yvars[i],main=paste(mod.names[j],"fit of",yvars[i],sep=" ")) #plot data
-    lines(loess.smooth(x,y), col="grey", lty=1, lwd=1)
+    plot(x,y,type="n", xlab="Biomass",ylab=unlist(strsplit(as.character(yvars[i]),"_"))[[2]],
+         main=paste(mod.names[j],"fit of",unlist(strsplit(as.character(yvars[i]),"_"))[[2]],sep=" ")) #plot data
     xseq = seq(0,max(x),length=max(x)*10)
-    eval(parse(text=model.fits[j])) #plot fitted curve line
     
-    npred = 10000
+    ## Generate estimates and predictions of y values from fitted model
+    npred = nrow(out)
     yest = matrix(NA,npred,length(xseq)) #y values (palsar) estimated from fitted x values (biomass)
-    
+    ypred= matrix(NA,npred,length(xseq)) #y values (palsar) estimated from fitted x values (biomass)
     samp = sample(1:nrow(out),npred)
+
+    #Calculate confidence interval
     for(p in 1:npred){
       k = samp[p]
       yest[p,] = eval(parse(text=mod.eqns[j]))
-      
     }
-    #Add confidence interval
     yci = apply(yest,2,quantile,c(0.025,0.5,0.975)) #confidence interval
-    #     ypi = apply() #predictive interval
-    lines(xseq,yci[1,],col=3)
-    lines(xseq,yci[3,],col=3)
-    legend("topright",lty=c(1,1,1),col=c("grey",2,3),legend=c("Loess","Curve Fit","95% C.I."),bty="n")
+
+    ##Calculate Prediction Interval
+    for(p in 1:npred){
+      k = samp[p]
+      yest[p,] = eval(parse(text=mod.eqns[j]))
+      ypred[p,]<-rnorm(length(xseq),yci[2,],out[k,colnames(out)=="sd"])
+    }
+    ypi = apply(ypred,2,quantile,c(0.025,0.5,0.975)) #predictive interval
+
+    
+    #Plot 95% Prediction Interval (lines and/or shaded area)
+    # lines(xseq,ypi[1,],col="grey30")
+    # lines(xseq,ypi[3,],col="grey30")
+    polygon(c(xseq, rev(xseq)), c(ypi[1,], rev(ypi[3,])),
+        col = "grey90", border = "grey80")
+
+    #Plot 95% confidence Interval (lines and/or shaded area)
+    # lines(xseq,yci[1,],col=3)
+    # lines(xseq,yci[3,],col=3)
+    polygon(c(xseq, rev(xseq)), c(yci[1,], rev(yci[3,])),
+        col = "grey50", border = "grey40")
+
+    points(x,y,pch=".") #plot data
+
+    lines(loess.smooth(x,y), col="black",lty=2, lwd=1) #Plot Loess curve
+    eval(parse(text=model.fits[j])) #Plot fitted model 
+    
+    legend("topright",lty=c(2,1,1,1),lwd=(3),
+           col=c(1,"grey80","grey40",1),
+           legend=c("Loess","Model","CI","PI"),bty="n")
     
     dev.off()
     

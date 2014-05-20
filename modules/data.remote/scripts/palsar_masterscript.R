@@ -315,7 +315,7 @@ palsar.plotter2(outpath,coord.set,fia)
 ##                    PALSAR values                    ##
 ##                                                     ##
 #########################################################
-n.reps<- 5000 #sets value for n.adapt and n.iter
+n.reps<- 1000 #sets value for n.adapt and n.iter
 n.chain<-3 #number of MCMC chains to run
 bayes.curve.fit(outpath,coord.set,fia,n.reps,n.chain)
 
