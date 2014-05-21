@@ -346,8 +346,12 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     }
     outpath2<-file.path(file.path(outpath1,substr(yvars[i],12,13),mod.names[j]))
     
-    
-    ##Do JAGS stuff
+
+    #########################################################
+    ##                                                     ##
+    ##                    Do JAGS stuff                    ##
+    ##                                                     ##
+    #########################################################
     j1 = jags.model(file=textConnection(models[j]),
                     data = data,
                     inits = unlist(eval(parse(text=init[i]))[j],recursive=FALSE),
@@ -358,7 +362,6 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     jags.out = coda.samples(model=j1,
                             variable.names<-var.names[j][[1]],
                             n.iter = n.reps) 
-    dic <- dic.samples(model=j1,n.iter = n.reps/5)
     out <- as.matrix(jags.out)
     
     #Save MCMC output
@@ -379,8 +382,22 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     saveRDS(gelman.diag(jags.out),file=file.path(outpath2,
                                                  paste("Gelman_Diag",coord.set[fia+1],substr(yvars[i],12,13),mod.names[j],".Rdata",sep="_")))
     
+    #########################################################
+    ##                                                     ##
+    ##                    Calculate DIC                    ##
+    ##           (Deviance Information Criteria)           ##
+    ##                                                     ##
+    #########################################################
+    dic <- dic.samples(model=j1,n.iter = n.reps/5)
+    mean.dev<-round(sum(dic$deviance))
+    penalty<-round(sum(dic$penalty),3)
+    penalized.dev<-mean.dev+round(sum(dic$penalty))
     
-    #Generate pdf of curve fits
+    #########################################################
+    ##                                                     ##
+    ##             Generate pdf of curve fits              ##
+    ##                                                     ##
+    #########################################################
     pdf(paste(paste(outpath2,"/","curve_fit_",coord.set[fia+1],sep=""),substr(yvars[i],12,13),mod.names[j],".pdf",sep="_"),width = 6, height = 6, paper='special')
     
     par(mar = rep(2, 4))    
@@ -390,27 +407,30 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     #autocorr.plot(jags.out)
     gelman.plot(jags.out)
     
-    #plot data
-    par(mfrow=c(1,1))
-    parm = apply(out,2,mean)
-    plot(x,y,type="n", xlab="Biomass",ylab=unlist(strsplit(as.character(yvars[i]),"_"))[[2]],
-         main=paste(mod.names[j],"fit of",unlist(strsplit(as.character(yvars[i]),"_"))[[2]],sep=" ")) #plot data
-    xseq = seq(0,max(x),length=max(x)*10)
-    
     ## Generate estimates and predictions of y values from fitted model
+    parm = apply(out,2,mean)
     npred = nrow(out)
+    xseq = seq(0,max(x),length=max(x)*10)
     yest = matrix(NA,npred,length(xseq)) #y values (palsar) estimated from fitted x values (biomass)
     ypred= matrix(NA,npred,length(xseq)) #y values (palsar) estimated from fitted x values (biomass)
     samp = sample(1:nrow(out),npred)
     
-    #Calculate confidence interval
+    #########################################################
+    ##                                                     ##
+    ##             Calculate Confidence Interval           ##
+    ##                                                     ##
+    #########################################################
     for(p in 1:npred){
       k = samp[p]
       yest[p,] = eval(parse(text=mod.eqns[j]))
     }
     yci = apply(yest,2,quantile,c(0.025,0.5,0.975)) #confidence interval
     
-    ##Calculate Prediction Interval
+    #########################################################
+    ##                                                     ##
+    ##             Calculate Prediction Interval           ##
+    ##                                                     ##
+    #########################################################
     for(p in 1:npred){
       k = samp[p]
       yest[p,] = eval(parse(text=mod.eqns[j]))
@@ -418,6 +438,15 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     }
     ypi = apply(ypred,2,quantile,c(0.025,0.5,0.975)) #predictive interval
     
+    #########################################################
+    ##                                                     ##
+    ##                   Assemble Plot                     ##
+    ##                                                     ##
+    #########################################################
+    #Initialize blank plot 
+    par(mfrow=c(1,1))
+    plot(x,y,type="n", xlab="Biomass",ylab=unlist(strsplit(as.character(yvars[i]),"_"))[[2]],
+         main=paste(mod.names[j],"fit of",unlist(strsplit(as.character(yvars[i]),"_"))[[2]],sep=" ")) #plot data
     
     #Plot 95% Prediction Interval (lines and/or shaded area)
     # lines(xseq,ypi[1,],col="grey30")
@@ -431,14 +460,24 @@ for(i in 1:length(yvars)){ #loop over HH and HV pol bands
     polygon(c(xseq, rev(xseq)), c(yci[1,], rev(yci[3,])),
             col = "grey50", border = "grey40")
     
-    points(x,y,pch=".") #plot data
+    #plot data
+    points(x,y,pch=".") 
     
-    lines(loess.smooth(x,y), col="black",lty=2, lwd=1) #Plot Loess curve
-    eval(parse(text=model.fits[j])) #Plot fitted model 
+    #Plot Loess curve
+    lines(loess.smooth(x,y), col="black",lty=2, lwd=1) 
     
+    #Plot fitted model curve
+    eval(parse(text=model.fits[j]))  
+    
+    #Add legend for various curves
     legend("topright",lty=c(2,1,1,1),lwd=(3),
            col=c(1,"grey80","grey40",1),
-           legend=c("Loess","Model","CI","PI"),bty="n")
+           legend=c("Loess","PI","CI","Model"),bty="n",ncol=4)
+    
+    #Add text for DIC values
+    legend("bottomright", legend=c(paste("Mean Dev.", mean.dev,sep=" "),
+                                   paste("Penalty",penalty,sep=" "),
+                                   paste("Penalized Dev.",penalized.dev,sep=" ")))
     
     dev.off()
     
